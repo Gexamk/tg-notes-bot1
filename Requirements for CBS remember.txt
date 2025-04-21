@@ -1,0 +1,61 @@
+User Story 1: Add media note
+As a user,
+I want to add a new media note by selecting a category (Cinema, Book, Song),
+So that I can keep track of items I want to read, watch, or listen to.
+
+✅ Acceptance Criteria:
+
+The bot asks me to choose a category from a list (Cinema, Book, Song)
+
+The bot asks for the name and the author/creator
+
+The note is saved in the database with status = "planned"
+
+After saving, the bot confirms the entry and shows the full list in that category
+
+🧩 User Story 2: View notes by category
+As a user,
+I want to view my saved notes filtered by category,
+So that I can quickly see what books, films, or songs I’ve saved.
+
+✅ Acceptance Criteria:
+
+The bot provides a command to “Show notes”
+
+I choose a category (Cinema, Book, Song)
+
+The bot returns a formatted list of all items in that category
+
+Each item includes name, author, and status
+
+🧩 User Story 3: Update note status
+As a user,
+I want to mark a note as “done” or change its status,
+So that I can track which items I’ve already completed.
+
+✅ Acceptance Criteria:
+
+I can trigger a command like “Update status”
+
+The bot asks me to choose a category and then shows notes from that category
+
+I select the note to update
+
+The bot asks me to choose a new status from a predefined list (e.g., planned,  done)
+
+The status is updated in the database, and I get a confirmation
+
+🧩 User Story 4: Autocomplete media info with AI
+As a user,
+I want the bot to auto-complete missing author/director/artist info using ChatGPT API based on the title,
+So that I don’t have to manually fill in details when adding a new note.
+
+✅ Acceptance Criteria:
+
+When adding a note, I can skip entering the author/creator
+
+The bot calls the ChatGPT API to fill in missing details
+
+The response includes a suggested name, which is shown to the user for confirmation
+
+If accepted, the note is saved with the AI-suggested data

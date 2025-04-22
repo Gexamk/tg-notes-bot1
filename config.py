@@ -11,3 +11,5 @@ DB_CONFIG = {
     'host': os.getenv('DB_HOST'),
     'port': os.getenv('DB_PORT'),
 }
+
+BOT_TOKEN = os.getenv('BOT_TOKEN')

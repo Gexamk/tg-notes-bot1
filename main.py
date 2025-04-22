@@ -1,7 +1,7 @@
 ### main.py
 
-from telegram.ext import ApplicationBuilder, CommandHandler
-from bot.handlers import handle_start, handle_add_note
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from bot.handlers import handle_start, handle_add_note, handle_text
 from config import BOT_TOKEN
 
 def main():
@@ -9,6 +9,7 @@ def main():
 
     app.add_handler(CommandHandler("start", handle_start))
     app.add_handler(CommandHandler("add", handle_add_note))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 
     app.run_polling()
 

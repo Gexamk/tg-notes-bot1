@@ -1,34 +1,81 @@
-User Story 1: Add media note
-As a user,
-I want to add a new media note by selecting a category (Cinema, Book, Song),
-So that I can keep track of items I want to read, watch, or listen to.
+🧾 User Story 1: Add a new media note
+As a user
+I want to add a new media note (Cinema, Book, or Song)
+So that I can keep track of what I plan to watch, read, or listen to.
 
 ✅ Acceptance Criteria:
+The bot asks the user to choose a category: Cinema, Book, or Song.
 
-The bot asks me to choose a category from a list (Cinema, Book, Song)
+The bot then asks the user to enter the name of the media item.
 
-The bot asks for the name and the author/creator
+The bot asks the user to enter the author/director/performer.
 
-The note is saved in the database with status = "planned"
+The note is saved to the database with the following fields:
 
-After saving, the bot confirms the entry and shows the full list in that category
+name (text)
 
-🧩 User Story 2: View notes by category
-As a user,
-I want to view my saved notes filtered by category,
-So that I can quickly see what books, films, or songs I’ve saved.
+author (text)
+
+category (text enum: Cinema, Book, Song)
+
+status (text, default is planned)
+
+created_at (timestamp, automatically filled with current date/time)
+
+The bot confirms the note has been saved.
+
+
+
+🧾 User Story 2: View media notes
+As a user
+I want to view my saved media notes by category
+So that I can see what I’ve added and plan to enjoy.
 
 ✅ Acceptance Criteria:
+The bot asks the user to select a category: Cinema, Book, or Song.
 
-The bot provides a command to “Show notes”
+The bot retrieves all media notes in the selected category.
 
-I choose a category (Cinema, Book, Song)
+The notes are sorted by creation date from oldest to newest.
 
-The bot returns a formatted list of all items in that category
+The bot displays the following fields for each note:
 
-Each item includes name, author, and status
+name
 
-🧩 User Story 3: Update note status
+author
+
+status
+
+
+
+🧾 User Story 3: Show media notes after adding one
+As a user
+I want to immediately see the updated list after adding a new media note
+So that I can confirm the note was added and review other saved items in that category.
+
+✅ Acceptance Criteria:
+After successfully saving a new media note (as per Story 1):
+
+The bot automatically retrieves and displays all media notes (with AC from US2) in the selected category.
+
+
+✅ User Story 4 — Authorization via Telegram ID
+As a Telegram user
+I want my media notes to be associated with my Telegram ID
+So that I can store and view my own private list of books, movies, and songs
+
+Acceptance Criteria:
+When a user interacts with the bot for the first time, their Telegram ID is saved to a users table.
+
+Each media note is linked to a user_id via foreign key.
+
+All commands (add, show) only work with the notes belonging to the current user.
+
+If a user is already in the database, no duplicate is added.
+
+
+
+🧩 User Story 5: Update note status
 As a user,
 I want to mark a note as “done” or change its status,
 So that I can track which items I’ve already completed.
@@ -45,7 +92,9 @@ The bot asks me to choose a new status from a predefined list (e.g., planned,  d
 
 The status is updated in the database, and I get a confirmation
 
-🧩 User Story 4: Autocomplete media info with AI
+
+
+🧩 User Story 6: Autocomplete media info with AI
 As a user,
 I want the bot to auto-complete missing author/director/artist info using ChatGPT API based on the title,
 So that I don’t have to manually fill in details when adding a new note.

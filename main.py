@@ -1,9 +1,8 @@
 ### main.py
 
 from telegram.ext import ApplicationBuilder, CommandHandler
-from handlers import handle_start, handle_add_note
+from bot.handlers import handle_start, handle_add_note
 from config import BOT_TOKEN
-
 
 def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()

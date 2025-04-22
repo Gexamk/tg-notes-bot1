@@ -1,37 +1,18 @@
-import psycopg2
-from dotenv import load_dotenv
-import os
+### main.py
 
-# Загружаем переменные из .env
-load_dotenv()
+from telegram.ext import ApplicationBuilder, CommandHandler
+from handlers import handle_start, handle_add_note
+from config import BOT_TOKEN
 
-# Читаем данные
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
 
-# Пробуем подключиться
-try:
-    conn = psycopg2.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
-    print("Подключение к базе данных успешно!")
+def main():
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-    # Можно открыть курсор и делать запросы
-    cursor = conn.cursor()
-    cursor.execute("SELECT version();")
-    version = cursor.fetchone()
-    print("Версия PostgreSQL:", version)
+    app.add_handler(CommandHandler("start", handle_start))
+    app.add_handler(CommandHandler("add", handle_add_note))
 
-    # Закрываем соединение
-    cursor.close()
-    conn.close()
+    app.run_polling()
 
-except Exception as e:
-    print("Ошибка подключения к базе:", e)
+
+if __name__ == "__main__":
+    main()

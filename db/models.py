@@ -18,6 +18,12 @@ class User:
                 cur.execute("INSERT INTO users (telegram_id) VALUES (%s)", (telegram_id,))
                 conn.commit()
 
+def get_user_id_by_telegram_id(telegram_id: int) -> int | None:
+    conn = get_connection()
+    with conn.cursor() as cur:
+        cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
+        row = cur.fetchone()
+        return row["id"] if row else None
 
 class MediaNote:
     def __init__(self, name, author, category, status, user_id):
@@ -35,4 +41,22 @@ class MediaNote:
                 INSERT INTO media_notes (name, author, category, status, user_id, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (self.name, self.author, self.category, self.status, self.user_id, self.created_at))
+            conn.commit()
+
+    @staticmethod
+    def update_status(note_id: int, new_status: str):
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE media_notes
+                SET status = %s
+                WHERE id = %s
+            """, (new_status, note_id))
+            conn.commit()
+            
+    @staticmethod
+    def delete(note_id: int):
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM media_notes WHERE id = %s", (note_id,))
             conn.commit()

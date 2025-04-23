@@ -14,6 +14,14 @@ MAIN_MARKUP = ReplyKeyboardMarkup(MAIN_KEYBOARD, resize_keyboard=True)
 VIEW_KEYBOARD = [["✅ Mark|Unmark", "🗑 Delete"], ["🔙 Back"]]
 VIEW_MARKUP = ReplyKeyboardMarkup(VIEW_KEYBOARD, resize_keyboard=True)
 
+def number_to_emoji(num: int) -> str:
+    emoji_map = {
+        "0": "0️⃣", "1": "1️⃣", "2": "2️⃣", "3": "3️⃣", "4": "4️⃣",
+        "5": "5️⃣", "6": "6️⃣", "7": "7️⃣", "8": "8️⃣", "9": "9️⃣"
+    }
+    return "".join(emoji_map[d] for d in str(num))
+
+
 async def reset_context(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
     await update.message.reply_text(
@@ -81,11 +89,13 @@ async def show_notes_by_category(update: Update, context: ContextTypes.DEFAULT_T
         response_lines = []
         for i, note in enumerate(notes):
             status_emoji = "✅" if note["status"] == "done" else ""
-            response_lines.append(f"{i + 1}️⃣ {note['name']} {status_emoji}")
+            number_emoji = number_to_emoji(i + 1)
+            response_lines.append(f"{number_emoji} {note['name']} {status_emoji}")
         response = "\n".join(response_lines)
         await update.message.reply_text(f"📂 {category}:", reply_markup=VIEW_MARKUP)
         await update.message.reply_text(response)
 
+#ввод названия и сохранение заметки
 async def handle_title_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get("awaiting_title"):
         title = update.message.text
@@ -116,7 +126,11 @@ async def handle_title_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
             f"✅ Заметка '{title}' добавлена в категорию {category}!",
             reply_markup=MAIN_MARKUP
         )
-        await reset_context(update, context)
+        context.user_data.clear()
+        context.user_data["mode"] = "view"
+        #context.user_data["awaiting_title"] = False
+        await show_notes_by_category(update, context, tg_user_id, category)
+        #await reset_context(update, context)
     else:
         await update.message.reply_text("Пожалуйста, используйте кнопки для выбора действия.")
     
@@ -153,7 +167,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Пожалуйста, используйте кнопки для выбора действия.")
         
-        
+#меняем статус или удаляем по введеному индексу        
 async def handle_number_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     if not text.isdigit():
@@ -173,6 +187,8 @@ async def handle_number_input(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
 
     note_id = notes[index]["id"]
+    name = notes[index]["name"]
+    category = notes[index]["category"]
 
     if action == "toggle_status":
         current_status = notes[index]["status"]
@@ -182,10 +198,9 @@ async def handle_number_input(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     elif action == "delete":
         MediaNote.delete(note_id)
-        await update.message.reply_text("Заметка удалена.")
+        await update.message.reply_text(f"Заметка '{name}' удалена из категории {category}.")
 
     tg_user_id = update.effective_user.id
     #category = context.user_data.get("category") не понятно почем в контексте пусто, пока поменяю
-    category = notes[index]["category"] 
 
     await show_notes_by_category(update, context, tg_user_id, category)

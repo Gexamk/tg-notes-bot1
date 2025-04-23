@@ -8,13 +8,10 @@ The bot asks the user to choose a category: Cinema, Book, or Song.
 
 The bot then asks the user to enter the name of the media item.
 
-The bot asks the user to enter the author/director/performer.
 
 The note is saved to the database with the following fields:
 
 name (text)
-
-author (text)
 
 category (text enum: Cinema, Book, Song)
 

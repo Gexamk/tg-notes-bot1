@@ -20,8 +20,7 @@ The note is saved to the database with the following fields:
 	created_at (timestamp, automatically filled with current date/time)
 
 The bot confirms the note has been saved  
-the bot Shows buttons "New", "View", "Back".
-
+the bot Shows buttons "New", "View"
 
 
 🧾 User Story 2: View media notes
@@ -126,7 +125,7 @@ At the every moment I can stop journey and start from the beginning without issu
 
 the bot Shows buttons "New", "View", "Back" and has cleaned context
 
-It should be possible on initial mode selection, on Category selection, during view mode, inserting Name for the note, numbers to select note for status change or deletion.
+It should be possible on Category selection, during view mode, inserting Name for the note, numbers to select note for status change or deletion.
 
 
 🧩 User Story 8: Autocomplete media info with AI

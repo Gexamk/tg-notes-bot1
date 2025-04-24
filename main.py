@@ -1,7 +1,8 @@
 ### main.py
 
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
-from bot.handlers import handle_start, handle_text, reset_context
+from bot.handlers import handle_start, reset_context
+from bot.router import handle_menu_and_typing
 from config import BOT_TOKEN
 from telegram.error import TelegramError
 import logging
@@ -10,7 +11,7 @@ def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", handle_start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_menu_and_typing))
 
     async def error_handler(update, context):
         logging.error(f"Ошибка: {context.error}", exc_info=True)

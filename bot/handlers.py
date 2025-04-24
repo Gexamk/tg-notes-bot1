@@ -27,7 +27,10 @@ async def reset_context(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tg_user_id = update.effective_user.id
-    User.get_or_create(tg_user_id)
+    first_name = update.effective_user.first_name
+    language_code = update.effective_user.language_code
+    
+    User.get_or_create(tg_user_id, first_name,  language_code)
 
     await update.message.reply_text(
         "Привет! Я помогу сохранить любимые фильмы, книги и песни.\nВыберите действие:",
@@ -47,6 +50,7 @@ async def handle_category_selection(update: Update, context: ContextTypes.DEFAUL
         await update.message.reply_text("Пожалуйста, выберите категорию с помощью кнопок.")
         return
 
+    #breakpoint()
     mode = context.user_data.get("mode")
 
     if mode == "add":

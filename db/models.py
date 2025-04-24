@@ -5,17 +5,19 @@ from datetime import datetime
 
 
 class User:
-    def __init__(self, telegram_id: int):
+    def __init__(self, telegram_id: int, first_name: str, language_code: str):
         self.telegram_id = telegram_id
+        self.first_name = first_name
+        self.language_code = language_code
 
     @staticmethod
-    def get_or_create(telegram_id: int):
+    def get_or_create(telegram_id: int, first_name: str, language_code: str):
         conn = get_connection()
         with conn.cursor() as cur:
             cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
             row = cur.fetchone()
             if not row:
-                cur.execute("INSERT INTO users (telegram_id) VALUES (%s)", (telegram_id,))
+                cur.execute("INSERT INTO users (telegram_id,first_name,language_code) VALUES (%s,%s,%s)", (telegram_id,first_name,language_code,))
                 conn.commit()
 
 def get_user_id_by_telegram_id(telegram_id: int) -> int | None:

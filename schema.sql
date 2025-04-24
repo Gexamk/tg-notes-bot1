@@ -36,3 +36,28 @@ BEGIN
     END IF;
 END
 $$;
+
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'users' AND column_name = 'first_name'
+    ) THEN
+        ALTER TABLE users
+        ADD COLUMN first_name TEXT;
+    END IF;
+END
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'users' AND column_name = 'language_code'
+    ) THEN
+        ALTER TABLE users
+        ADD COLUMN language_code TEXT;
+    END IF;
+END
+$$;

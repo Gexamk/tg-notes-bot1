@@ -4,22 +4,23 @@ I want to add a new media note (Cinema, Book, or Song)
 So that I can keep track of what I plan to watch, read, or listen to.
 
 ✅ Acceptance Criteria:
-The bot asks the user to choose a category: Cinema, Book, or Song.
+
+After clicking button "New" The bot asks the user to choose a category: Cinema, Book, or Song.
 
 The bot then asks the user to enter the name of the media item.
 
-
 The note is saved to the database with the following fields:
 
-name (text)
+	name (text)
 
-category (text enum: Cinema, Book, Song)
+	category (text enum: Cinema, Book, Song)
 
-status (text, default is planned)
+	status (text, default is planned)
 
-created_at (timestamp, automatically filled with current date/time)
+	created_at (timestamp, automatically filled with current date/time)
 
-The bot confirms the note has been saved.
+The bot confirms the note has been saved  
+the bot Shows buttons "New", "View", "Back".
 
 
 
@@ -29,7 +30,7 @@ I want to view my saved media notes by category
 So that I can see what I’ve added and plan to enjoy.
 
 ✅ Acceptance Criteria:
-The bot asks the user to select a category: Cinema, Book, or Song.
+After clicking button "View" The bot asks the user to select a category: Cinema, Book, or Song.
 
 The bot retrieves all media notes in the selected category.
 
@@ -37,12 +38,13 @@ The notes are sorted by creation date from oldest to newest.
 
 The bot displays the following fields for each note:
 
-name
+	iterative number (emodji of each digit)
 
-author
+	name
 
-status
+	status - shows ✅ id done and nothing if planned
 
+the bot Shows buttons "Mark|Unmark", "Delete", "Back".
 
 
 🧾 User Story 3: Show media notes after adding one
@@ -54,6 +56,8 @@ So that I can confirm the note was added and review other saved items in that ca
 After successfully saving a new media note (as per Story 1):
 
 The bot automatically retrieves and displays all media notes (with AC from US2) in the selected category.
+
+the bot Shows buttons "Mark|Unmark", "Delete", "Back".
 
 
 ✅ User Story 4 — Authorization via Telegram ID
@@ -79,19 +83,53 @@ So that I can track which items I’ve already completed.
 
 ✅ Acceptance Criteria:
 
-I can trigger a command like “Update status”
+I can trigger a command like Update status clicking button "Mark|Unmark" after View action, when list has been shown
 
-The bot asks me to choose a category and then shows notes from that category
+The bot asks me to choose a number to change status
 
-I select the note to update
+I type the number to update
 
-The bot asks me to choose a new status from a predefined list (e.g., planned,  done)
+The bot changing status of the note from Planned to Done or opposite in database, and I get a confirmation
 
-The status is updated in the database, and I get a confirmation
+The bot updates last list and I see status of relevant note updated
+
+the bot Shows buttons "Mark|Unmark", "Delete", "Back".
 
 
+🧩 User Story 5: Delete note
+As a user,
+I want to delete a note from the category,
+So that I can keep my list up to date.
 
-🧩 User Story 6: Autocomplete media info with AI
+✅ Acceptance Criteria:
+
+I can trigger a command like delete note clicking button "Mark|Unmark" after View action, when list has been shown
+
+The bot asks me to choose a number 
+
+I type the number to delete note
+
+The bot delete selected note, and I get a confirmation
+
+The bot updates last list and I see 1 note less
+
+the bot Shows buttons "Mark|Unmark", "Delete", "Back".
+
+🧩 User Story 7: Button back implementation
+As a user,
+I want to come back to main menu in the middle of the flow,
+So that I can have excellent navigation even if I changed my mind 
+
+✅ Acceptance Criteria:
+
+At the every moment I can stop journey and start from the beginning without issues
+
+the bot Shows buttons "New", "View", "Back" and has cleaned context
+
+It should be possible on initial mode selection, on Category selection, during view mode, inserting Name for the note, numbers to select note for status change or deletion.
+
+
+🧩 User Story 8: Autocomplete media info with AI
 As a user,
 I want the bot to auto-complete missing author/director/artist info using ChatGPT API based on the title,
 So that I don’t have to manually fill in details when adding a new note.

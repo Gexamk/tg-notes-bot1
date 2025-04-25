@@ -6,9 +6,11 @@ from bot.router import handle_menu_and_typing
 from config import BOT_TOKEN
 from telegram.error import TelegramError
 import logging
+import os
+from dotenv import load_dotenv
 
 def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app = ApplicationBuilder().token(os.getenv("BOT_TOKEN")).build()
 
     app.add_handler(CommandHandler("start", handle_start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_menu_and_typing))

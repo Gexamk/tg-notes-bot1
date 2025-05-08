@@ -39,7 +39,10 @@ from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 import logging
 import asyncio
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.DEBUG  # Уровень логирования DEBUG покажет всё
+)
 
 app = Flask(__name__)
 
@@ -51,21 +54,35 @@ async def echo(update: Update, context):
 
 telegram_app.add_handler(MessageHandler(filters.TEXT, echo))
 
+async def echo(update: Update, context):
+    logging.debug(f"📩 Сообщение от пользователя: {update.message.text}")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Принято")
+
+
 @app.route('/webhook', methods=['POST'])
 def webhook():
+    logging.debug("🔔 Вызван webhook")
+    logging.debug(f"Headers: {request.headers}")
+    logging.debug(f"Body: {request.get_json(force=True)}")
+
     if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET_TOKEN:
+        logging.warning("🚫 Неверный секретный токен")
         return 'Unauthorized', 401
 
-    update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-    telegram_app.update_queue.put_nowait(update)
+    try:
+        update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+        telegram_app.update_queue.put_nowait(update)
+        logging.debug("✅ Обновление добавлено в очередь")
+    except Exception as e:
+        logging.error(f"❌ Ошибка при обработке webhook: {e}")
 
     return 'OK'
 
 # 🧠 Критический момент: инициализация Telegram App
 async def run_app():
     await telegram_app.initialize()
-    await telegram_app.start()  # запуск бота (без polling)
-    print("✅ Telegram bot запущен")
+    await telegram_app.start()
+    logging.info("🚀 Telegram Application initialized and started")
 
 if __name__ == '__main__':
     asyncio.run(run_app())  # Запускаем телеграм-бота

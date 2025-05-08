@@ -81,4 +81,4 @@ async def run_app():
 
 if __name__ == '__main__':
     asyncio.run(run_app())  # Запускаем телеграм-бота
-    app.run(port=8080)      # Запускаем Flask
+    app.run(host='0.0.0.0', port=8080)      # Запускаем Flask

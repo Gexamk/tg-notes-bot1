@@ -11,7 +11,7 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Открываем порт 8080 (Cloud Run ожидает, что сервис будет слушать на этом порту)
-#EXPOSE 8080
+EXPOSE 8080
 
 # Указываем команду для запуска приложения
 CMD ["python", "main.py"]

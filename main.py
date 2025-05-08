@@ -39,7 +39,7 @@ from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 from bot.router import handle_text
 from bot.common import handle_start, reset_context
 import logging
-import asyncio
+import threading
 import os
 
 app = Flask(__name__)
@@ -50,10 +50,12 @@ telegram_app.add_handler(handle_text)
 telegram_app.add_handler(handle_start)
 
 # Функция для запуска Telegram приложения
-async def run_telegram():
-    await telegram_app.initialize()
-    await telegram_app.start()
-    print("Telegram application started.")
+def run_telegram():
+    try:
+        telegram_app.run_polling()
+        print("Telegram application started.")
+    except Exception as e:
+        print(f"Error starting Telegram application: {e}")
 
 # Роут для вебхука
 @app.route('/webhook', methods=['POST'])
@@ -69,11 +71,11 @@ def webhook():
     print(data)    
     return 'OK'
 
-# Запуск Telegram приложения в фоне
+# Запуск Telegram приложения в отдельном потоке
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.create_task(run_telegram())
+    # Запуск в отдельном потоке
+    telegram_thread = threading.Thread(target=run_telegram)
+    telegram_thread.start()
 
-    # Установка порта из переменных окружения
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+
+    app.run(host="0.0.0.0", port="8080")

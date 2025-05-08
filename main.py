@@ -8,8 +8,10 @@ from telegram.error import TelegramError
 import logging
 import os
 from dotenv import load_dotenv
+import logging
 
 def main():
+    logging.warning(f"Using bot token: {BOT_TOKEN}")
     app = ApplicationBuilder().token(os.getenv("BOT_TOKEN")).build()
 
     app.add_handler(CommandHandler("start", handle_start))

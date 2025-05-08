@@ -37,21 +37,23 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler
 from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 import logging
+import asyncio
 
 app = Flask(__name__)
 
-# Создаем приложение Telegram
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+
+# Создаем Telegram Application
 telegram_app = Application.builder().token(BOT_TOKEN).build()
 
-# Простая команда, которая будет логировать сообщение
+# Обработчик /start
 async def handle_start(update: Update, context):
     logging.info("Received /start command")
     await update.message.reply_text("Hello! I'm your Telegram bot.")
 
-# Добавляем хэндлер для команды /start
 telegram_app.add_handler(CommandHandler("start", handle_start))
 
-# Роут для вебхука
 @app.route('/webhook', methods=['POST'])
 def webhook():
     if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET_TOKEN:
@@ -59,12 +61,19 @@ def webhook():
 
     update = Update.de_json(request.get_json(force=True), telegram_app.bot)
     telegram_app.update_queue.put_nowait(update)
-    
-    data = request.get_json()
-    logging.info(f"Received update: {data}")
+
+    logging.info(f"Received update: {request.get_json()}")
     return 'OK'
 
-# Запуск Flask приложения
+# Функция для запуска Telegram Application в фоне
+async def run_telegram():
+    await telegram_app.initialize()
+    await telegram_app.start()
+    logging.info("Telegram application started.")
+
+# Запускаем Flask и Telegram App
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    app.run(host="0.0.0.0", port=8080)
+    # Запускаем Telegram Application в фоне
+    asyncio.run(run_telegram())
+    # Запускаем Flask-приложение
+    app.run(host='0.0.0.0', port=8080)

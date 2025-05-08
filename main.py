@@ -34,25 +34,22 @@
 
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, CommandHandler
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 import logging
 import asyncio
 
-app = Flask(__name__)
-
-# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
-# Создаем Telegram Application
+app = Flask(__name__)
+
 telegram_app = Application.builder().token(BOT_TOKEN).build()
 
-# Обработчик /start
-async def handle_start(update: Update, context):
-    logging.info("Received /start command")
-    await update.message.reply_text("Hello! I'm your Telegram bot.")
+# Простейший обработчик
+async def echo(update: Update, context):
+    print("Получено сообщение:", update.message.text)
 
-telegram_app.add_handler(CommandHandler("start", handle_start))
+telegram_app.add_handler(MessageHandler(filters.TEXT, echo))
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -62,18 +59,14 @@ def webhook():
     update = Update.de_json(request.get_json(force=True), telegram_app.bot)
     telegram_app.update_queue.put_nowait(update)
 
-    logging.info(f"Received update: {request.get_json()}")
     return 'OK'
 
-# Функция для запуска Telegram Application в фоне
-async def run_telegram():
+# 🧠 Критический момент: инициализация Telegram App
+async def run_app():
     await telegram_app.initialize()
-    await telegram_app.start()
-    logging.info("Telegram application started.")
+    await telegram_app.start()  # запуск бота (без polling)
+    print("✅ Telegram bot запущен")
 
-# Запускаем Flask и Telegram App
 if __name__ == '__main__':
-    # Запускаем Telegram Application в фоне
-    asyncio.run(run_telegram())
-    # Запускаем Flask-приложение
-    app.run(host='0.0.0.0', port=8080)
+    asyncio.run(run_app())  # Запускаем телеграм-бота
+    app.run(port=8080)      # Запускаем Flask

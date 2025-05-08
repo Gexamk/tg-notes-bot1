@@ -1,26 +1,17 @@
-# Используем официальный Python-образ
-FROM python:3.11-slim
+# Используем официальный образ Python
+FROM python:3.9-slim
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Устанавливаем системные зависимости
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Копируем зависимости
-COPY requirements.txt .
-
-# Устанавливаем Python-зависимости
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Копируем остальной код
+# Копируем все файлы проекта в контейнер
 COPY . .
 
-# Указываем переменные окружения (можно переопределить в Cloud Run)
-ENV PYTHONUNBUFFERED=1
+# Устанавливаем зависимости
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Команда запуска
+# Открываем порт 8080 (Cloud Run ожидает, что сервис будет слушать на этом порту)
+EXPOSE 8080
+
+# Указываем команду для запуска приложения
 CMD ["python", "main.py"]

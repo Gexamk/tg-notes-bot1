@@ -32,53 +32,30 @@
 #if __name__ == "__main__":
 #    main()
 
-from flask import Flask, request
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
-from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
+import time
 import logging
-import asyncio
+from flask import Flask
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG  # Уровень логирования DEBUG покажет всё
-)
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
-telegram_app = Application.builder().token(BOT_TOKEN).build()
+@app.route('/')
+def home():
+    return "Hello, this is a test endpoint!"
 
-# Простейший обработчик
-async def echo(update: Update, context):
-    print("Получено сообщение:", update.message.text)
-
-telegram_app.add_handler(MessageHandler(filters.TEXT, echo))
-
-async def echo(update: Update, context):
-    logging.debug(f"📩 Сообщение от пользователя: {update.message.text}")
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Принято")
-
-
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET_TOKEN:
-        return 'Unauthorized', 401
-
-    update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-    
-    # Логируем входящие данные
-    app.logger.info(f"Received update: {update.to_dict()}")
-
-    telegram_app.update_queue.put_nowait(update)
-    
-    return 'OK'
-
-# 🧠 Критический момент: инициализация Telegram App
-async def run_app():
-    await telegram_app.initialize()
-    await telegram_app.start()
-    logging.info("🚀 Telegram Application initialized and started")
+# Функция для записи лога каждую секунду
+def log_every_30_seconds():
+    while True:
+        logging.info("Application is running and logging every 30 seconds.")
+        time.sleep(30)  # Пауза в 30 секунд
 
 if __name__ == '__main__':
-    asyncio.run(run_app())  # Запускаем телеграм-бота
-    app.run(host='0.0.0.0', port=8080)      # Запускаем Flask
+    # Запускаем логирование в отдельном потоке
+    from threading import Thread
+    log_thread = Thread(target=log_every_30_seconds, daemon=True)
+    log_thread.start()
+
+    # Запускаем Flask приложение
+    app.run(host='0.0.0.0', port=8080)

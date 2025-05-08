@@ -53,6 +53,10 @@ def webhook():
 
     update = Update.de_json(request.get_json(force=True), telegram_app.bot)
     telegram_app.update_queue.put_nowait(update)
+    
+    data = request.get_json()
+    # логируем входящие апдейты
+    print(data)    
     return 'OK'
 
 if __name__ == '__main__':

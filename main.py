@@ -33,51 +33,53 @@
 #    main()
 
 import logging
-import asyncio
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, ContextTypes, MessageHandler, filters
+from telegram.ext import Application, ContextTypes
 from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
+from bot.router import handle_text
+from bot.common import handle_start, reset_context
 
-# Настройка логирования
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Flask-приложение
 app = Flask(__name__)
 
-# Telegram Application
+# Настройка логов
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+
+# Создание Telegram-приложения
 telegram_app = Application.builder().token(BOT_TOKEN).build()
+telegram_app.add_handler(handle_start)
+telegram_app.add_handler(handle_text)
 
-# Простой обработчик текста
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    logging.info(f"Got message: {update.message.text}")
-    await update.message.reply_text("✅ Принял!")
-
-telegram_app.add_handler(MessageHandler(filters.TEXT, echo))
+@app.route('/')
+def root():
+    return 'Bot is running!'
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
     if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET_TOKEN:
         return 'Unauthorized', 401
 
+    update = Update.de_json(request.get_json(force=True), telegram_app.bot)
     try:
-        update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-        asyncio.create_task(telegram_app.process_update(update))
-        logging.info("✅ Update received and processed")
+        telegram_app.loop.create_task(telegram_app.process_update(update))
+        logging.info("✅ Update received and scheduled for processing")
     except Exception as e:
-        logging.exception("Ошибка при обработке запроса")
+        logging.exception("Ошибка при запуске process_update")
 
     return 'OK'
 
-# Запуск Telegram App в фоне
-async def start_telegram():
-    await telegram_app.initialize()
-    await telegram_app.start()
-    logging.info("🚀 Telegram bot started")
-
-# Запуск Flask и Telegram
 if __name__ == '__main__':
-    asyncio.get_event_loop().run_until_complete(start_telegram())
-    logging.info("🌐 Flask app starting on port 8080")
-    app.run(host='0.0.0.0', port=8080)
+    import asyncio
+
+    async def run():
+        await telegram_app.initialize()
+        await telegram_app.start()
+        logging.info("🚀 Telegram application started.")
+        app.run(host='0.0.0.0', port=8080)
+        await telegram_app.stop()
+        await telegram_app.shutdown()
+
+    asyncio.run(run())

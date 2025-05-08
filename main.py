@@ -56,7 +56,6 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 telegram_app.add_handler(MessageHandler(filters.TEXT, echo))
 
-# Webhook-роут
 @app.route('/webhook', methods=['POST'])
 def webhook():
     if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET_TOKEN:
@@ -64,8 +63,8 @@ def webhook():
 
     try:
         update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-        telegram_app.update_queue.put_nowait(update)
-        logging.info("✅ Update received and pushed to queue")
+        asyncio.create_task(telegram_app.process_update(update))
+        logging.info("✅ Update received and processed")
     except Exception as e:
         logging.exception("Ошибка при обработке запроса")
 

@@ -34,28 +34,22 @@
 
 import time
 import logging
-from flask import Flask
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Hello, this is a test endpoint!"
-
-# Функция для записи лога каждую секунду
-def log_every_30_seconds():
+# Функция для записи лога каждые 10 секунд
+def log_every_10_seconds():
     while True:
-        logging.info("Application is running and logging every 30 seconds.")
-        time.sleep(30)  # Пауза в 30 секунд
+        logging.info("Application is running and logging every 10 seconds.")
+        time.sleep(10)  # Пауза в 10 секунд
 
 if __name__ == '__main__':
-    # Запускаем логирование в отдельном потоке
+    # Запуск функции записи логов в фоновом потоке
     from threading import Thread
-    log_thread = Thread(target=log_every_30_seconds, daemon=True)
+    log_thread = Thread(target=log_every_10_seconds, daemon=True)
     log_thread.start()
 
-    # Запускаем Flask приложение
-    app.run(host='0.0.0.0', port=8080)
+    # Приложение продолжает работать в фоновом режиме
+    while True:
+        time.sleep(1000)  # Просто цикл, чтобы приложение не завершилось

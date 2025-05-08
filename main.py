@@ -61,21 +61,16 @@ async def echo(update: Update, context):
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    logging.debug("🔔 Вызван webhook")
-    logging.debug(f"Headers: {request.headers}")
-    logging.debug(f"Body: {request.get_json(force=True)}")
-
     if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET_TOKEN:
-        logging.warning("🚫 Неверный секретный токен")
         return 'Unauthorized', 401
 
-    try:
-        update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-        telegram_app.update_queue.put_nowait(update)
-        logging.debug("✅ Обновление добавлено в очередь")
-    except Exception as e:
-        logging.error(f"❌ Ошибка при обработке webhook: {e}")
+    update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+    
+    # Логируем входящие данные
+    app.logger.info(f"Received update: {update.to_dict()}")
 
+    telegram_app.update_queue.put_nowait(update)
+    
     return 'OK'
 
 # 🧠 Критический момент: инициализация Telegram App

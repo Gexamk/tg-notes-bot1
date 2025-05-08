@@ -32,24 +32,51 @@
 #if __name__ == "__main__":
 #    main()
 
-import time
+from flask import Flask, request
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 import logging
+import os
 
 # Настройка логирования
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 
-# Функция для записи лога каждые 10 секунд
-def log_every_10_seconds():
-    while True:
-        logging.info("Application is running and logging every 10 seconds.")
-        time.sleep(10)  # Пауза в 10 секунд
+# Flask-приложение
+app = Flask(__name__)
 
-if __name__ == '__main__':
-    # Запуск функции записи логов в фоновом потоке
-    from threading import Thread
-    log_thread = Thread(target=log_every_10_seconds, daemon=True)
-    log_thread.start()
+# Telegram bot application
+telegram_app = Application.builder().token(BOT_TOKEN).build()
 
-    # Приложение продолжает работать в фоновом режиме
-    while True:
-        time.sleep(1000)  # Просто цикл, чтобы приложение не завершилось
+# Обработчик /start
+async def handle_start(update: Update, context):
+    await update.message.reply_text("Привет! Я бот и работаю через Webhook.")
+
+# Обработчик обычных сообщений
+async def handle_text(update: Update, context):
+    text = update.message.text
+    await update.message.reply_text(f"Ты написал: {text}")
+
+# Регистрируем обработчики
+telegram_app.add_handler(CommandHandler("start", handle_start))
+telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET_TOKEN:
+        return "Unauthorized", 401
+
+    update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+    telegram_app.update_queue.put_nowait(update)
+
+    logging.info("✅ Update received and pushed to queue")
+    return "OK", 200
+
+@app.route("/", methods=["GET"])
+def root():
+    return "✅ Bot is running", 200
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)

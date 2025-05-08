@@ -34,28 +34,22 @@
 
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, ContextTypes
+from telegram.ext import Application, CommandHandler
 from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
-from bot.router import handle_text
-from bot.common import handle_start, reset_context
 import logging
-import threading
-import os
 
 app = Flask(__name__)
 
-# Создание приложения Telegram
+# Создаем приложение Telegram
 telegram_app = Application.builder().token(BOT_TOKEN).build()
-telegram_app.add_handler(handle_text)
-telegram_app.add_handler(handle_start)
 
-# Функция для запуска Telegram приложения
-def run_telegram():
-    try:
-        telegram_app.run_polling()
-        print("Telegram application started.")
-    except Exception as e:
-        print(f"Error starting Telegram application: {e}")
+# Простая команда, которая будет логировать сообщение
+async def handle_start(update: Update, context):
+    logging.info("Received /start command")
+    await update.message.reply_text("Hello! I'm your Telegram bot.")
+
+# Добавляем хэндлер для команды /start
+telegram_app.add_handler(CommandHandler("start", handle_start))
 
 # Роут для вебхука
 @app.route('/webhook', methods=['POST'])
@@ -67,15 +61,10 @@ def webhook():
     telegram_app.update_queue.put_nowait(update)
     
     data = request.get_json()
-    # Логируем входящие апдейты
-    print(data)    
+    logging.info(f"Received update: {data}")
     return 'OK'
 
-# Запуск Telegram приложения в отдельном потоке
+# Запуск Flask приложения
 if __name__ == '__main__':
-    # Запуск в отдельном потоке
-    telegram_thread = threading.Thread(target=run_telegram)
-    telegram_thread.start()
-
-
-    app.run(host="0.0.0.0", port="8080")
+    logging.basicConfig(level=logging.INFO)
+    app.run(host="0.0.0.0", port=8080)

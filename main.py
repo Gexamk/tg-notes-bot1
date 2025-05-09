@@ -1,11 +1,8 @@
 import logging
 import asyncio
-import threading
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import (
-    Application, CommandHandler, MessageHandler, ContextTypes, filters
-)
+from telegram.ext import Application, ContextTypes, MessageHandler, CommandHandler, filters
 from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 from bot.router import handle_menu_and_typing
 from bot.handlers import handle_start
@@ -21,9 +18,17 @@ app = Flask(__name__)
 telegram_app = Application.builder().token(BOT_TOKEN).build()
 
 # Обработчики Telegram
+async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("👋 Привет! Бот работает.")
+
+async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.info(f"📩 Message from user: {update.message.text}")
+    await update.message.reply_text("✅ Принял!")
+
 telegram_app.add_handler(CommandHandler("start", handle_start))
 telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_menu_and_typing))
 
+# Webhook-обработчик
 @app.route('/webhook', methods=['POST'])
 def webhook():
     if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET_TOKEN:
@@ -31,24 +36,22 @@ def webhook():
 
     try:
         update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-        telegram_app.update_queue.put_nowait(update)
         logging.info("✅ Update received and added to queue")
+        asyncio.run(telegram_app.process_update(update))
     except Exception as e:
-        logging.exception("Ошибка при обработке запроса")
+        logging.exception("❌ Ошибка при обработке запроса")
 
     return 'OK'
 
-# Запуск Telegram-бота в фоновом потоке
-def start_telegram_in_thread():
-    async def runner():
-        await telegram_app.initialize()
-        await telegram_app.start()
-        await telegram_app.updater.start_polling()
-        logging.info("🚀 Telegram dispatcher is running")
+# Запуск Telegram Application
+async def run_telegram():
+    await telegram_app.initialize()
+    await telegram_app.start()
+    logging.info("🚀 Telegram dispatcher is running")
 
-    asyncio.run(runner())
-
+# Запуск Flask + Telegram
 if __name__ == '__main__':
-    threading.Thread(target=start_telegram_in_thread, daemon=True).start()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run_telegram())
     logging.info("🌐 Flask app starting on port 8080")
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host="0.0.0.0", port=8080)

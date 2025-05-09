@@ -33,7 +33,7 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     User.get_or_create(tg_user_id, first_name,  language_code)
 
     await update.message.reply_text(
-        "Привет! Я помогу сохранить любимые фильмы, книги и песни.\nВыберите действие:",
+        "Привет! Я помогу сохранить любимые фильмы, книги и список покупок.\nВыберите действие:",
         reply_markup=MAIN_MARKUP
     )
 
@@ -43,7 +43,7 @@ async def handle_category_selection(update: Update, context: ContextTypes.DEFAUL
     category_map = {
         "🎬 Cinema": "Cinema",
         "📚 Book": "Book",
-        "🎵 Song": "Song"
+        "🛒 Shop": "Shop"
     }
     category = category_map.get(text)
     if not category:
@@ -56,7 +56,7 @@ async def handle_category_selection(update: Update, context: ContextTypes.DEFAUL
     if mode == "add":
         context.user_data["category"] = category
         context.user_data["awaiting_title"] = True
-        await update.message.reply_text("Введите название (например: Бесы):")
+        await update.message.reply_text("Введите название:")
 
     elif mode == "view":
         tg_user_id = update.effective_user.id

@@ -35,27 +35,27 @@
 import logging
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, ContextTypes
+from telegram.ext import Application, ApplicationBuilder
 from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 from bot.router import handle_text
-from bot.common import handle_start, reset_context
+from bot.common import handle_start
 
 app = Flask(__name__)
 
-# Настройка логов
+# Логирование
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 
-# Создание Telegram-приложения
-telegram_app = Application.builder().token(BOT_TOKEN).build()
+# Telegram приложение (Application в sync-режиме)
+telegram_app = ApplicationBuilder().token(BOT_TOKEN).build()
 telegram_app.add_handler(handle_start)
 telegram_app.add_handler(handle_text)
 
 @app.route('/')
-def root():
-    return 'Bot is running!'
+def index():
+    return "Bot is alive!"
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -63,23 +63,15 @@ def webhook():
         return 'Unauthorized', 401
 
     update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+
     try:
-        telegram_app.loop.create_task(telegram_app.process_update(update))
-        logging.info("✅ Update received and scheduled for processing")
+        telegram_app.process_update(update)
+        logging.info("✅ Update received and processed")
     except Exception as e:
-        logging.exception("Ошибка при запуске process_update")
+        logging.exception("Ошибка при обработке update")
 
     return 'OK'
 
 if __name__ == '__main__':
-    import asyncio
-
-    async def run():
-        await telegram_app.initialize()
-        await telegram_app.start()
-        logging.info("🚀 Telegram application started.")
-        app.run(host='0.0.0.0', port=8080)
-        await telegram_app.stop()
-        await telegram_app.shutdown()
-
-    asyncio.run(run())
+    logging.info("🚀 Starting Flask app...")
+    app.run(host="0.0.0.0", port=8080)

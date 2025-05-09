@@ -2,7 +2,7 @@
 
 from db import get_connection
 from datetime import datetime
-
+from typing import Optional
 
 class User:
     def __init__(self, telegram_id: int, first_name: str, language_code: str):
@@ -20,7 +20,9 @@ class User:
                 cur.execute("INSERT INTO users (telegram_id,first_name,language_code) VALUES (%s,%s,%s)", (telegram_id,first_name,language_code,))
                 conn.commit()
 
-def get_user_id_by_telegram_id(telegram_id: int) -> int | None:
+
+
+def get_user_id_by_telegram_id(telegram_id: int) -> Optional[int]:
     conn = get_connection()
     with conn.cursor() as cur:
         cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))

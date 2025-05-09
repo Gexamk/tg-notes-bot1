@@ -33,45 +33,61 @@
 #    main()
 
 import logging
+import asyncio
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, ApplicationBuilder
-from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
-from bot.router import handle_text
-from bot.common import handle_start
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
+from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
+
+# Настройка логгера
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Flask app
 app = Flask(__name__)
 
-# Логирование
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+# Telegram bot
+telegram_app = Application.builder().token(BOT_TOKEN).build()
 
-# Telegram приложение (Application в sync-режиме)
-telegram_app = ApplicationBuilder().token(BOT_TOKEN).build()
-telegram_app.add_handler(handle_start)
-telegram_app.add_handler(handle_text)
+# Простейшие хендлеры
+async def start(update: Update, context):
+    await update.message.reply_text("Привет! Бот работает.")
 
-@app.route('/')
-def index():
-    return "Bot is alive!"
+async def echo(update: Update, context):
+    await update.message.reply_text(f"Ты написал: {update.message.text}")
 
-@app.route('/webhook', methods=['POST'])
+telegram_app.add_handler(CommandHandler("start", start))
+telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+
+# Webhook endpoint
+@app.route("/webhook", methods=["POST"])
 def webhook():
-    if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET_TOKEN:
-        return 'Unauthorized', 401
-
-    update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+    if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET_TOKEN:
+        logger.warning("❌ Неверный секретный токен")
+        return "Unauthorized", 401
 
     try:
-        telegram_app.process_update(update)
-        logging.info("✅ Update received and processed")
+        update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+        logger.info("✅ Update получен и добавлен в очередь: %s", update)
+        telegram_app.update_queue.put_nowait(update)
     except Exception as e:
-        logging.exception("Ошибка при обработке update")
+        logger.exception("❌ Ошибка обработки update: %s", e)
 
-    return 'OK'
+    return "OK", 200
 
-if __name__ == '__main__':
-    logging.info("🚀 Starting Flask app...")
+# Запуск Flask и Telegram
+if __name__ == "__main__":
+    logger.info("🚀 Старт приложения...")
+
+    # Запуск Telegram-приложения в фоне
+    async def run_telegram():
+        await telegram_app.initialize()
+        logger.info("✅ Telegram приложение инициализировано")
+        await telegram_app.start()
+        logger.info("📬 Telegram приложение запущено")
+
+    asyncio.get_event_loop().create_task(run_telegram())
+
+    # Запуск Flask
     app.run(host="0.0.0.0", port=8080)

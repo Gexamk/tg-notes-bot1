@@ -6,7 +6,7 @@ from telegram.ext import Application, ContextTypes, MessageHandler, CommandHandl
 from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 from bot.router import handle_menu_and_typing
 from bot.handlers import handle_start
-
+from threading import Thread
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -40,8 +40,11 @@ def webhook():
         update = Update.de_json(request.get_json(force=True), telegram_app.bot)
         logging.info("✅ Update received and added to queue")
 
-        # Вместо ручного создания loop:
-        asyncio.run(telegram_app.process_update(update))
+        # Создаём отдельный поток и запускаем там event loop
+        def process():
+            asyncio.run(telegram_app.process_update(update))
+
+        Thread(target=process).start()
 
     except Exception:
         logging.exception("❌ Ошибка при обработке запроса")

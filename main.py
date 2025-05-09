@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import threading
 from flask import Flask, request
 from telegram import Update
 from telegram.ext import (
@@ -9,12 +10,17 @@ from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 from bot.router import handle_menu_and_typing
 from bot.handlers import handle_start
 
+# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Flask-приложение
 app = Flask(__name__)
+
+# Telegram Application
 telegram_app = Application.builder().token(BOT_TOKEN).build()
 
+# Обработчики Telegram
 telegram_app.add_handler(CommandHandler("start", handle_start))
 telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_menu_and_typing))
 
@@ -32,14 +38,17 @@ def webhook():
 
     return 'OK'
 
-async def run_telegram():
-    await telegram_app.initialize()
-    await telegram_app.start()
-    await telegram_app.updater.start_polling()  # Важно: запускаем обработку update_queue
-    logging.info("🚀 Telegram dispatcher is running")
+# Запуск Telegram-бота в фоновом потоке
+def start_telegram_in_thread():
+    async def runner():
+        await telegram_app.initialize()
+        await telegram_app.start()
+        await telegram_app.updater.start_polling()
+        logging.info("🚀 Telegram dispatcher is running")
+
+    asyncio.run(runner())
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.create_task(run_telegram())
+    threading.Thread(target=start_telegram_in_thread, daemon=True).start()
     logging.info("🌐 Flask app starting on port 8080")
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host='0.0.0.0', port=8080)

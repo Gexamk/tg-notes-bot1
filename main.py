@@ -38,13 +38,13 @@ from flask import Flask, request
 from telegram import Update
 from telegram.ext import Application, ContextTypes
 from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
-from bot.router import handle_text
-from bot.common import handle_start, reset_context
+from bot.handlers import handle_start, reset_context
+from bot.router import handle_menu_and_typing
 
 app = Flask(__name__)
 
 telegram_app = Application.builder().token(BOT_TOKEN).build()
-telegram_app.add_handler(handle_text)
+telegram_app.add_handler(handle_menu_and_typing)
 telegram_app.add_handler(handle_start)
 
 @app.before_first_request

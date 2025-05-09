@@ -65,4 +65,4 @@ $$;
 ALTER TABLE media_notes DROP CONSTRAINT media_notes_category_check;
 
 ALTER TABLE media_notes
-ADD CONSTRAINT media_notes_category_check CHECK (category IN ('Cinema', 'Book', 'Shop'));
+ADD CONSTRAINT media_notes_category_check CHECK (category IN ('Cinema', 'Book', 'Shop', 'Note'));

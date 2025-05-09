@@ -5,7 +5,7 @@ from telegram import ReplyKeyboardMarkup
 MAIN_KEYBOARD = [["➕ New", "📋 View"]]
 MAIN_MARKUP = ReplyKeyboardMarkup(MAIN_KEYBOARD, resize_keyboard=True)
 
-CATEGORY_KEYBOARD = [["🎬 Cinema", "📚 Book", "🛒 Shop"], ["🔙 Back"]]
+CATEGORY_KEYBOARD = [["🎬 Cinema", "📚 Book", "🛒 Shop","🗒 Note"], ["🔙 Back"]]
 CATEGORY_MARKUP = ReplyKeyboardMarkup(CATEGORY_KEYBOARD, resize_keyboard=True)
 
 VIEW_KEYBOARD = [["✅ Mark|Unmark", "🗑 Delete"], ["🔙 Back"]]

@@ -40,9 +40,12 @@ def webhook():
         update = Update.de_json(request.get_json(force=True), telegram_app.bot)
         logging.info("✅ Update received and added to queue")
 
-        # Запускаем асинхронную задачу безопасно
-        asyncio.get_event_loop().create_task(telegram_app.process_update(update))
-        
+        # Создаем и запускаем отдельный event loop
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(telegram_app.process_update(update))
+        loop.close()
+
     except Exception:
         logging.exception("❌ Ошибка при обработке запроса")
 

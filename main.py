@@ -1,65 +1,55 @@
 import logging
 import asyncio
+from threading import Thread
+from queue import Queue
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, ContextTypes, MessageHandler, CommandHandler, filters
-from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
-from bot.router import handle_menu_and_typing
-from bot.handlers import handle_start
-from threading import Thread
+from telegram.ext import Application, ContextTypes, CommandHandler, MessageHandler, filters
 
-# Настройка логирования
+from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
+from bot.handlers import handle_start
+from bot.router import handle_menu_and_typing
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Flask-приложение
 app = Flask(__name__)
 
-# Telegram Application
+update_queue = Queue()
+
 telegram_app = Application.builder().token(BOT_TOKEN).build()
-
-
-# Обработчики Telegram
-async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 Привет! Бот работает.")
-
-async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    logging.info(f"📩 Message from user: {update.message.text}")
-    await update.message.reply_text("✅ Принял!")
-
 telegram_app.add_handler(CommandHandler("start", handle_start))
 telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_menu_and_typing))
 
-# Webhook-обработчик
 @app.route('/webhook', methods=['POST'])
 def webhook():
     if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET_TOKEN:
         return 'Unauthorized', 401
-
     try:
         update = Update.de_json(request.get_json(force=True), telegram_app.bot)
         logging.info("✅ Update received and added to queue")
-
-        # Создаём отдельный поток и запускаем там event loop
-        def process():
-            asyncio.run(telegram_app.process_update(update))
-
-        Thread(target=process).start()
-
+        update_queue.put(update)
     except Exception:
         logging.exception("❌ Ошибка при обработке запроса")
-
     return 'OK'
 
-# Запуск Telegram Application
-async def run_telegram():
+async def telegram_worker():
     await telegram_app.initialize()
     await telegram_app.start()
     logging.info("🚀 Telegram dispatcher is running")
 
-# Запуск Flask + Telegram
+    while True:
+        update = await asyncio.to_thread(update_queue.get)
+        try:
+            await telegram_app.process_update(update)
+        except Exception as e:
+            logging.exception("Ошибка в обработчике: %s", e)
+
+def start_telegram():
+    asyncio.run(telegram_worker())
+
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run_telegram())
-    logging.info("🌐 Flask app starting on port 8080")
-    app.run(host="0.0.0.0", port=8080)
+    thread = Thread(target=start_telegram)
+    thread.start()
+    logging.info("🌐 Flask app starting")
+    app.run(host='0.0.0.0', port=8080)

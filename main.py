@@ -36,7 +36,7 @@ import asyncio
 import logging
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, ContextTypes
+from telegram.ext import Application, ContextTypes, CommandHandler, MessageHandler, filters
 from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 from bot.handlers import handle_start, reset_context
 from bot.router import handle_menu_and_typing

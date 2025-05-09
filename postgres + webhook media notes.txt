@@ -1,12 +1,1 @@
-postgresql://neondb_owner:npg_x1jgpLbOn4Dq@ep-small-pond-a2h8m453-pooler.eu-central-1.aws.neon.tech/MediaNotes?sslmode=require
 
-# Do not expose your Neon credentials to the browser
-
-PGHOST='ep-small-pond-a2h8m453-pooler.eu-central-1.aws.neon.tech'
-PGDATABASE='MediaNotes'
-PGUSER='neondb_owner'
-PGPASSWORD='npg_x1jgpLbOn4Dq'
-
-https://api.telegram.org/bot7386615627:AAFTNGhPP2KMDubCfLvW8kv09eNjQABd6vs/setWebhook?url=https://tg-notes-bot1-1030184339122.europe-central2.run.app/webhook&secret_token=2343dderf1jksnse33AA2s
-
-https://api.telegram.org/bot7386615627:AAFTNGhPP2KMDubCfLvW8kv09eNjQABd6vs/getWebhookInfo

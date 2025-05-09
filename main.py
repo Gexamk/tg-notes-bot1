@@ -7,6 +7,7 @@ from config import BOT_TOKEN, WEBHOOK_SECRET_TOKEN
 from bot.router import handle_menu_and_typing
 from bot.handlers import handle_start
 
+
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,6 +17,7 @@ app = Flask(__name__)
 
 # Telegram Application
 telegram_app = Application.builder().token(BOT_TOKEN).build()
+
 
 # Обработчики Telegram
 async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -37,8 +39,11 @@ def webhook():
     try:
         update = Update.de_json(request.get_json(force=True), telegram_app.bot)
         logging.info("✅ Update received and added to queue")
-        asyncio.run(telegram_app.process_update(update))
-    except Exception as e:
+
+        # Запускаем асинхронную задачу безопасно
+        asyncio.get_event_loop().create_task(telegram_app.process_update(update))
+        
+    except Exception:
         logging.exception("❌ Ошибка при обработке запроса")
 
     return 'OK'

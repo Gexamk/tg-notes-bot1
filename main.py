@@ -45,7 +45,7 @@ app = Flask(__name__)
 
 telegram_app = Application.builder().token(BOT_TOKEN).build()
 telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_menu_and_typing))
-telegram_app.add_handler(handle_start)
+telegram_app.add_handler(CommandHandler("start", handle_start))
 
 @app.before_first_request
 def start_telegram_bot():

@@ -7,14 +7,16 @@ from .add_note import handle_title_input
 from .status_and_delete import handle_number_input
 from .keyboards import CATEGORY_KEYBOARD, CATEGORY_MARKUP, MAIN_KEYBOARD, MAIN_MARKUP, VIEW_KEYBOARD, VIEW_MARKUP
 import bot.keyboards
-
+import logging
 
 async def handle_menu_and_typing(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
 
     if text == "➕ New":          
         mode = context.user_data.get("mode")
+        logging.info("New Mode='{mode}'")
         category = context.user_data.get("category")
+        logging.info("New Category='{category}'")
         if mode == "view" and category:  #если нажали New из маркапа просмотра кокретной категории то сразу в нее добавлем
             context.user_data["awaiting_title"] = True
             context.user_data["mode"] = "add"

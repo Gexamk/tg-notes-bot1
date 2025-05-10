@@ -5,7 +5,7 @@ from psycopg2.extras import RealDictCursor
 from config import DB_CONFIG
 import os
 from dotenv import load_dotenv
-
+from psycopg2 import OperationalError, InterfaceError
 
 DB_POOL = pool.SimpleConnectionPool(
     1, 10,  # minconn, maxconn
@@ -14,11 +14,25 @@ DB_POOL = pool.SimpleConnectionPool(
 )
 
 
+#def get_connection():
+#    return DB_POOL.getconn()
+
 def get_connection():
-    return DB_POOL.getconn()
+    conn = DB_POOL.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+        return conn
+    except (OperationalError, InterfaceError):
+        try:
+            conn.close()  # полностью убираем битое соединение
+        except Exception:
+            pass
+        return DB_POOL.getconn()  # берём новое
 
 def release_connection(conn):
-    DB_POOL.putconn(conn)
+    if conn:
+        DB_POOL.putconn(conn)
 
 
 def get_connection_URL():

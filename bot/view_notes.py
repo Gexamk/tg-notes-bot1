@@ -25,7 +25,7 @@ async def show_notes_by_category(update: Update, context: ContextTypes.DEFAULT_T
             notes = cur.fetchall()
     finally:
         logging.info("❌ exception in getting list of notes by category within DB interaction")
-        release_connection(conn) 
+        db.release_connection(conn) 
 
     if not notes:
         await update.message.reply_text("Заметки не найдены в этой категории.", reply_markup=MAIN_MARKUP)

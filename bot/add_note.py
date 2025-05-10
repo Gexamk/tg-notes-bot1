@@ -32,6 +32,7 @@ async def handle_title_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
             reply_markup=MAIN_MARKUP
         )
         #context.user_data.clear()
+        context.user_data["awaiting_title"] = False
         context.user_data["mode"] = "view"
         await show_notes_by_category(update, context, tg_user_id, category)
     else:

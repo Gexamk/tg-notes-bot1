@@ -13,7 +13,7 @@ async def show_notes_by_category(update: Update, context: ContextTypes.DEFAULT_T
     if not user_id:
         await update.message.reply_text("Пользователь не найден. Пожалуйста, начните заново.")
         return
-
+    
     conn = db.get_connection()
     try:
         with conn.cursor() as cur:

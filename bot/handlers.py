@@ -2,9 +2,9 @@
 
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
+import db
 from db.models import User, MediaNote, get_user_id_by_telegram_id
 from .keyboards import CATEGORY_KEYBOARD, CATEGORY_MARKUP, MAIN_KEYBOARD, MAIN_MARKUP, VIEW_KEYBOARD, VIEW_MARKUP
-import db
 import bot.add_note, bot.view_notes
 
 #general handlers like start and select category

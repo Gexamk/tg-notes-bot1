@@ -3,7 +3,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from db.models import MediaNote, get_user_id_by_telegram_id
-from db import get_connection
 from .view_notes import show_notes_by_category
 from .keyboards import CATEGORY_KEYBOARD, CATEGORY_MARKUP, MAIN_KEYBOARD, MAIN_MARKUP, VIEW_KEYBOARD, VIEW_MARKUP
 

@@ -2,7 +2,7 @@
 
 from telegram import Update
 from telegram.ext import ContextTypes
-from db.models import MediaNote
+from db.models import MediaNote, get_user_id_by_telegram_id
 from db import get_connection
 from .view_notes import show_notes_by_category
 from .keyboards import CATEGORY_KEYBOARD, CATEGORY_MARKUP, MAIN_KEYBOARD, MAIN_MARKUP, VIEW_KEYBOARD, VIEW_MARKUP
@@ -16,14 +16,16 @@ async def handle_title_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
         tg_user_id = update.effective_user.id
 
         # Получаем user_id из БД
-        conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute("SELECT id FROM users WHERE telegram_id = %s", (tg_user_id,))
-            user_row = cur.fetchone()
-            if not user_row:
-                await update.message.reply_text("Пользователь не найден. Пожалуйста, начните заново.")
-                return
-            user_id = user_row["id"]
+        user_id = get_user_id_by_telegram_id(tg_user_id)
+        
+        #conn = get_connection()
+        #with conn.cursor() as cur:
+        #    cur.execute("SELECT id FROM users WHERE telegram_id = %s", (tg_user_id,))
+        #    user_row = cur.fetchone()
+        #    if not user_row:
+        #        await update.message.reply_text("Пользователь не найден. Пожалуйста, начните заново.")
+        #        return
+        #    user_id = user_row["id"]
 
         # Создаём и сохраняем заметку
         note = MediaNote(

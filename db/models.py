@@ -13,21 +13,29 @@ class User:
     @staticmethod
     def get_or_create(telegram_id: int, first_name: str, language_code: str):
         conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
-            row = cur.fetchone()
-            if not row:
-                cur.execute("INSERT INTO users (telegram_id,first_name,language_code) VALUES (%s,%s,%s)", (telegram_id,first_name,language_code,))
-                conn.commit()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
+                row = cur.fetchone()
+                if not row:
+                    cur.execute("INSERT INTO users (telegram_id,first_name,language_code) VALUES (%s,%s,%s)", (telegram_id,first_name,language_code,))
+                    conn.commit()
+        finally:
+            logging.info("❌ exception in get or create user within DB interaction")
+            release_connection(conn)  
 
 
 
 def get_user_id_by_telegram_id(telegram_id: int) -> Optional[int]:
     conn = get_connection()
-    with conn.cursor() as cur:
-        cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
-        row = cur.fetchone()
-        return row["id"] if row else None
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
+            row = cur.fetchone()
+            return row["id"] if row else None
+    finally:
+        logging.info("❌ exception in get user by ID within DB interaction")
+        release_connection(conn)  
 
 class MediaNote:
     def __init__(self, name, author, category, status, user_id):
@@ -40,27 +48,39 @@ class MediaNote:
 
     def save(self):
         conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO media_notes (name, author, category, status, user_id, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (self.name, self.author, self.category, self.status, self.user_id, self.created_at))
-            conn.commit()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO media_notes (name, author, category, status, user_id, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (self.name, self.author, self.category, self.status, self.user_id, self.created_at))
+                conn.commit()
+        finally:
+            logging.info("❌ exception during saving Note within DB interaction")
+            release_connection(conn)  
 
     @staticmethod
     def update_status(note_id: int, new_status: str):
         conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute("""
-                UPDATE media_notes
-                SET status = %s
-                WHERE id = %s
-            """, (new_status, note_id))
-            conn.commit()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE media_notes
+                    SET status = %s
+                    WHERE id = %s
+                """, (new_status, note_id))
+                conn.commit()
+        finally:
+            logging.info("❌ exception during updating status within DB interaction")
+            release_connection(conn)  
             
     @staticmethod
     def delete(note_id: int):
         conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute("DELETE FROM media_notes WHERE id = %s", (note_id,))
-            conn.commit()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM media_notes WHERE id = %s", (note_id,))
+                conn.commit()
+        finally:
+            logging.info("❌ exception during deleting note within DB interaction")
+            release_connection(conn)        

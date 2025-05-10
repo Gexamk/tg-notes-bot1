@@ -7,9 +7,6 @@ from db.models import get_user_id_by_telegram_id
 import bot.handlers 
 import db, db.models
 
-
-
-
 async def show_notes_by_category(update: Update, context: ContextTypes.DEFAULT_TYPE, tg_user_id: int, category: str):
     user_id = get_user_id_by_telegram_id(tg_user_id)
     if not user_id:
@@ -17,13 +14,17 @@ async def show_notes_by_category(update: Update, context: ContextTypes.DEFAULT_T
         return
 
     conn = db.get_connection()
-    with conn.cursor() as cur:
-        cur.execute("""
-            SELECT id, name, category, status FROM media_notes
-            WHERE user_id = %s AND category = %s
-            ORDER BY created_at ASC
-        """, (user_id, category))
-        notes = cur.fetchall()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, name, category, status FROM media_notes
+                WHERE user_id = %s AND category = %s
+                ORDER BY created_at ASC
+            """, (user_id, category))
+            notes = cur.fetchall()
+    finally:
+        logging.info("❌ exception in getting list of notes by category within DB interaction")
+        release_connection(conn) 
 
     if not notes:
         await update.message.reply_text("Заметки не найдены в этой категории.", reply_markup=MAIN_MARKUP)

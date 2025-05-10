@@ -24,6 +24,7 @@ def get_connection():
             cur.execute("SELECT 1")
         return conn
     except (OperationalError, InterfaceError):
+        logging.warning(f"❗Проблема с соединением к БД: {e}")
         try:
             conn.close()  # полностью убираем битое соединение
         except Exception:

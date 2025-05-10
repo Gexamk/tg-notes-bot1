@@ -3,6 +3,7 @@
 from db import get_connection
 from datetime import datetime
 from typing import Optional
+import logging
 
 class User:
     def __init__(self, telegram_id: int, first_name: str, language_code: str):

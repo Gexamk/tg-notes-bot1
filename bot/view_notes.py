@@ -6,6 +6,7 @@ from .keyboards import CATEGORY_KEYBOARD, CATEGORY_MARKUP, MAIN_KEYBOARD, MAIN_M
 from db.models import get_user_id_by_telegram_id
 import bot.handlers 
 import db, db.models
+import logging
 
 async def show_notes_by_category(update: Update, context: ContextTypes.DEFAULT_TYPE, tg_user_id: int, category: str):
     user_id = get_user_id_by_telegram_id(tg_user_id)

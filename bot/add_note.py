@@ -16,15 +16,6 @@ async def handle_title_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
         # Получаем user_id из БД
         user_id = get_user_id_by_telegram_id(tg_user_id)
-        
-        #conn = get_connection()
-        #with conn.cursor() as cur:
-        #    cur.execute("SELECT id FROM users WHERE telegram_id = %s", (tg_user_id,))
-        #    user_row = cur.fetchone()
-        #    if not user_row:
-        #        await update.message.reply_text("Пользователь не найден. Пожалуйста, начните заново.")
-        #        return
-        #    user_id = user_row["id"]
 
         # Создаём и сохраняем заметку
         note = MediaNote(

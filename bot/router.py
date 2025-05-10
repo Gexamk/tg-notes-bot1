@@ -12,12 +12,19 @@ import bot.keyboards
 async def handle_menu_and_typing(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
 
-    if text == "➕ New":
-        context.user_data["mode"] = "add"
-        await update.message.reply_text(
-            "Выберите категорию для новой заметки:",
-            reply_markup=CATEGORY_MARKUP
-        )
+    if text == "➕ New":          
+        mode = context.user_data.get("mode")
+        category = context.user_data.get("category")
+        if mode == "view" and category:  #если нажали New из маркапа просмотра кокретной категории то сразу в нее добавлем
+            context.user_data["awaiting_title"] = True
+            context.user_data["mode"] = "add"
+            await update.message.reply_text("Введите название:")
+        else:
+            context.user_data["mode"] = "add"
+            await update.message.reply_text(
+                "Выберите категорию для новой заметки:",
+                reply_markup=CATEGORY_MARKUP
+            )
     elif text == "📋 View":
         context.user_data["mode"] = "view"
         await update.message.reply_text(

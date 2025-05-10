@@ -15,7 +15,8 @@ async def handle_menu_and_typing(update: Update, context: ContextTypes.DEFAULT_T
     if text == "➕ New":          
         mode = context.user_data.get("mode")
         category = context.user_data.get("category")
-        logging.info(f"mode: {mode}, category: {category}")
+        #logging.info(f"mode: {mode}, category: {category}")
+        logging.info("context.user_data = %s", dict(context.user_data))
         if mode == "view" and category:  #если нажали New из маркапа просмотра кокретной категории то сразу в нее добавлем
             context.user_data["awaiting_title"] = True
             context.user_data["mode"] = "add"

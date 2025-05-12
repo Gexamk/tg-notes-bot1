@@ -23,9 +23,10 @@ async def show_notes_by_category(update: Update, context: ContextTypes.DEFAULT_T
                 ORDER BY created_at ASC
             """, (user_id, category))
             notes = cur.fetchall()
+    except Exception as e:
+        logging.exception(f"❌ Exception in get_or_create_user: {e}")
     finally:
-        logging.info("❌ exception in getting list of notes by category within DB interaction")
-        db.release_connection(conn) 
+        release_connection(conn) 
 
     if not notes:
         await update.message.reply_text("Заметки не найдены в этой категории.", reply_markup=MAIN_MARKUP)

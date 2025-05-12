@@ -21,8 +21,9 @@ class User:
                 if not row:
                     cur.execute("INSERT INTO users (telegram_id,first_name,language_code) VALUES (%s,%s,%s)", (telegram_id,first_name,language_code,))
                     conn.commit()
+        except Exception as e:
+            logging.exception(f"❌ Exception in get_or_create_user: {e}")
         finally:
-            logging.info("❌ exception in get or create user within DB interaction")
             release_connection(conn)  
 
 
@@ -57,9 +58,10 @@ class MediaNote:
                     VALUES (%s, %s, %s, %s, %s, %s)
                 """, (self.name, self.author, self.category, self.status, self.user_id, self.created_at))
                 conn.commit()
+        except Exception as e:
+            logging.exception(f"❌ Exception in get_or_create_user: {e}")
         finally:
-            logging.info("❌ exception during saving Note within DB interaction")
-            release_connection(conn)  
+            release_connection(conn)   
 
     @staticmethod
     def update_status(note_id: int, new_status: str):
@@ -72,8 +74,9 @@ class MediaNote:
                     WHERE id = %s
                 """, (new_status, note_id))
                 conn.commit()
+        except Exception as e:
+            logging.exception(f"❌ Exception in get_or_create_user: {e}")
         finally:
-            logging.info("❌ exception during updating status within DB interaction")
             release_connection(conn)  
             
     @staticmethod
@@ -83,6 +86,7 @@ class MediaNote:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM media_notes WHERE id = %s", (note_id,))
                 conn.commit()
+        except Exception as e:
+            logging.exception(f"❌ Exception in get_or_create_user: {e}")
         finally:
-            logging.info("❌ exception during deleting note within DB interaction")
-            release_connection(conn)        
+            release_connection(conn)         

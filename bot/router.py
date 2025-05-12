@@ -31,7 +31,7 @@ async def handle_menu_and_typing(update: Update, context: ContextTypes.DEFAULT_T
             "Выберите категорию для просмотра заметок:",
             reply_markup=CATEGORY_MARKUP
         )
-    elif text in ["🎬 Cinema", "📚 Book", "🛒 Shop", "🗒 Note"]:
+    elif text in ["🎬 Cinema", "📚 Book", "🛒 Shop", "📌 Note", "🧾 To Do"]:
         await handle_category_selection(update, context)
     elif text == "✅ Mark|Unmark":
         context.user_data["action"] = "toggle_status"

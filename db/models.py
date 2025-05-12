@@ -34,9 +34,10 @@ def get_user_id_by_telegram_id(telegram_id: int) -> Optional[int]:
             cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
             row = cur.fetchone()
             return row["id"] if row else None
+    except Exception as e:
+        logging.exception(f"❌ Exception in get_or_create_user: {e}")
     finally:
-        logging.info("❌ exception in get user by ID within DB interaction")
-        release_connection(conn)  
+        release_connection(conn) 
 
 class MediaNote:
     def __init__(self, name, author, category, status, user_id):

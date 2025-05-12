@@ -45,7 +45,7 @@ async def handle_category_selection(update: Update, context: ContextTypes.DEFAUL
         "📚 Book": "Book",
         "🛒 Shop": "Shop",
         "📌 Note": "Note",
-        "🧾 To Do": "To Do"
+        "📝 To Do": "To Do"
     }
     category = category_map.get(text)
     if not category:
